@@ -1,0 +1,305 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block title %}{% if action == "Créer" %}Créer Département{% else %}Modifier Département{% endif %}{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">{{ action }} un Département</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de Bord</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'departements:department_list' %}">Départements</a></li>
+                        <li class="breadcrumb-item active">{{ action }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Informations du Département</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Afficher les erreurs générales -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    <h4 class="alert-heading">Erreur!</h4>
+                                    <ul class="mb-0">
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            <!-- Section: Informations Générales -->
+                            <div class="form-section mb-4">
+                                <h5 class="mb-3 border-bottom pb-2">Informations Générales</h5>
+                                
+                                <div class="form-group row">
+                                    <label for="{{ form.name.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Nom complet du département (ex: Génie Informatique)
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.code.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.code.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.code }}
+                                        {% if form.code.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.code.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Code court unique du département (ex: GI)
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.description.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.description.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Responsable (HOD) -->
+                            <div class="form-section mb-4">
+                                <h5 class="mb-3 border-bottom pb-2">Responsable du Département (HOD)</h5>
+                                
+                                <div class="form-group row">
+                                    <label for="{{ form.hod_name.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.hod_name.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.hod_name }}
+                                        {% if form.hod_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.hod_name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.hod_email.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.hod_email.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.hod_email }}
+                                        {% if form.hod_email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.hod_email.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.hod_phone.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.hod_phone.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.hod_phone }}
+                                        {% if form.hod_phone.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.hod_phone.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Localisation -->
+                            <div class="form-section mb-4">
+                                <h5 class="mb-3 border-bottom pb-2">Localisation</h5>
+                                
+                                <div class="form-group row">
+                                    <label for="{{ form.building.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.building.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.building }}
+                                        {% if form.building.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.building.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.floor.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.floor.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.floor }}
+                                        {% if form.floor.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.floor.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.room_number.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.room_number.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.room_number }}
+                                        {% if form.room_number.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.room_number.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section: Métadonnées -->
+                            <div class="form-section mb-4">
+                                <h5 class="mb-3 border-bottom pb-2">Métadonnées</h5>
+                                
+                                <div class="form-group row">
+                                    <label for="{{ form.founded_year.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.founded_year.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.founded_year }}
+                                        {% if form.founded_year.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.founded_year.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.budget.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.budget.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        <div class="input-group">
+                                            {{ form.budget }}
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">DH</span>
+                                            </div>
+                                        </div>
+                                        {% if form.budget.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.budget.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.is_active.id_for_label }}" class="col-sm-3 col-form-label">
+                                    </label>
+                                    <div class="col-sm-9">
+                                        <div class="form-check">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                                {{ form.is_active.label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="form-group row">
+                                <div class="col-sm-9 offset-sm-3">
+                                    <button type="submit" class="btn btn-primary mr-2">
+                                        <i class="fas fa-save"></i> Enregistrer
+                                    </button>
+                                    <a href="{% url 'departements:department_list' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Annuler
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aide et Conseils -->
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-header">
+                        <h5 class="card-title">Aide</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Conseils de remplissage:</h6>
+                        <ul class="small">
+                            <li><strong>Code:</strong> Identifiant unique court (ex: GI, GM, GEL)</li>
+                            <li><strong>Responsable:</strong> Chef du département</li>
+                            <li><strong>Localisation:</strong> Aide à trouver le département</li>
+                            <li><strong>Budget:</strong> Budget annuel alloué</li>
+                            <li><strong>Statut:</strong> Cochez pour rendre le département actif</li>
+                        </ul>
+                    </div>
+                </div>
+
+                {% if department %}
+                <div class="card mt-3 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">Informations d'Édition</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="small mb-1">
+                            <strong>Créé:</strong> {{ department.created_at|date:"d/m/Y H:i" }}
+                        </p>
+                        <p class="small">
+                            <strong>Modifié:</strong> {{ department.updated_at|date:"d/m/Y H:i" }}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 PreSchool Management System.</p>
+    </footer>
+</div>
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+{% endblock %}

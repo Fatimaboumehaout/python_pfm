@@ -1,0 +1,117 @@
+{% extends "Home/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Calendrier des Vacances</h2>
+        <div>
+            <a href="{% url 'holidays:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter une vacance
+            </a>
+            <a href="{% url 'holidays:list' %}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> Vue liste
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Légende</h5>
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <span class="badge" style="background-color: #ff6b6b; color: white;">Vacances</span>
+                </div>
+                <small class="text-muted">
+                    Cliquez sur une vacance pour voir les détails ou la modifier
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/fr.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'fr',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        },
+        height: 'auto',
+        events: '/holidays/api/events/',
+        eventClick: function(info) {
+            // Rediriger vers la page de détails si l'événement a une URL
+            if (info.event.url) {
+                window.location.href = info.event.url;
+            }
+        },
+        eventDidMount: function(info) {
+            // Ajouter un tooltip avec la description
+            if (info.event.extendedProps.description) {
+                info.el.setAttribute('title', info.event.extendedProps.description);
+            }
+        },
+        buttonText: {
+            today: "Aujourd'hui",
+            month: 'Mois',
+            week: 'Semaine',
+            day: 'Jour',
+            list: 'Liste'
+        },
+        allDayText: 'Toute la journée',
+        moreLinkText: 'en plus',
+        noEventsText: 'Aucun événement à afficher'
+    });
+    
+    calendar.render();
+});
+</script>
+
+<style>
+#calendar {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.fc .fc-button-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.fc .fc-day-today {
+    background-color: #fff3cd !important;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    opacity: 0.8;
+}
+</style>
+{% endblock body %}

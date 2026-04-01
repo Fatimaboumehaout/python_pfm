@@ -1,0 +1,210 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block title %}{% if action == "Assigner" %}Assigner Enseignant{% else %}Modifier Attribution{% endif %}{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">{{ action }} un Enseignant au Département</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de Bord</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'departements:department_list' %}">Départements</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'departements:department_detail' department.id %}">{{ department.name }}</a></li>
+                        <li class="breadcrumb-item active">{{ action }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">
+                            <strong>Département:</strong> {{ department.code }} - {{ department.name }}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Afficher les erreurs générales -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    <h4 class="alert-heading">Erreur!</h4>
+                                    <ul class="mb-0">
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            <!-- Informations sur l'Enseignant -->
+                            <fieldset>
+                                <legend class="mb-3 border-bottom pb-2">Informations de l'Enseignant</legend>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.teacher_id.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.teacher_id.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.teacher_id }}
+                                        {% if form.teacher_id.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.teacher_id.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Identifiant unique de l'enseignant
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.teacher_name.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.teacher_name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.teacher_name }}
+                                        {% if form.teacher_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.teacher_name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Nom complet de l'enseignant
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.teacher_email.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.teacher_email.label }}
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.teacher_email }}
+                                        {% if form.teacher_email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.teacher_email.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Détails de l'Attribution -->
+                            <fieldset class="mt-4">
+                                <legend class="mb-3 border-bottom pb-2">Détails de l'Attribution</legend>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.position.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.position.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.position }}
+                                        {% if form.position.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.position.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Sélectionnez le poste de l'enseignant au sein du département
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="{{ form.assigned_date.id_for_label }}" class="col-sm-3 col-form-label">
+                                        {{ form.assigned_date.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-sm-9">
+                                        {{ form.assigned_date }}
+                                        {% if form.assigned_date.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.assigned_date.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Date de début d'affectation
+                                        </small>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Boutons -->
+                            <div class="form-group row mt-4">
+                                <div class="col-sm-9 offset-sm-3">
+                                    <button type="submit" class="btn btn-primary mr-2">
+                                        <i class="fas fa-save"></i> Enregistrer
+                                    </button>
+                                    <a href="{% url 'departements:department_detail' department.id %}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Annuler
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aide et Information -->
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-header">
+                        <h5 class="card-title">Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="small">
+                            Vous êtes en train d'assigner un enseignant au département 
+                            <strong>{{ department.code }}</strong>.
+                        </p>
+                        <hr>
+                        <h6>Postes disponibles:</h6>
+                        <ul class="small">
+                            <li><strong>HOD:</strong> Chef de Département</li>
+                            <li><strong>Senior Lecturer:</strong> Maître de Conférences</li>
+                            <li><strong>Lecturer:</strong> Chargé de Cours</li>
+                            <li><strong>Assistant:</strong> Assistant d'Enseignement</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mt-3 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">Département</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="small mb-1">
+                            <strong>Code:</strong> <span class="badge badge-info">{{ department.code }}</span>
+                        </p>
+                        <p class="small mb-1">
+                            <strong>Nom:</strong> {{ department.name }}
+                        </p>
+                        <p class="small mb-1">
+                            <strong>Responsable:</strong> {{ department.hod_name|default:"Non assigné" }}
+                        </p>
+                        <p class="small">
+                            <strong>Enseignants Actuels:</strong> {{ department.get_teachers_count }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 PreSchool Management System.</p>
+    </footer>
+</div>
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+{% endblock %}

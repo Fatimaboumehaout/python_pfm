@@ -1,0 +1,290 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block title %}{{ department.name }}{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        
+        <!-- Vérification d'erreur -->
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Erreur!</h4>
+                <p>{{ error }}</p>
+                <hr>
+                <p class="mb-0"><a href="{% url 'departements:department_list' %}">Retour à la liste</a></p>
+            </div>
+        {% endif %}
+        
+        {% if not department %}
+            <div class="alert alert-warning" role="alert">
+                Aucun département sélectionné!
+            </div>
+        {% endif %}
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">
+                        <span class="badge badge-info" style="font-size: 16px;">{{ department.code }}</span>
+                        {{ department.name }}
+                    </h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de Bord</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'departements:department_list' %}">Départements</a></li>
+                        <li class="breadcrumb-item active">{{ department.name }}</li>
+                    </ul>
+                </div>
+                <div class="col-auto text-right">
+                    <a href="{% url 'departements:department_update' department.pk %}" class="btn btn-warning mr-2">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <form action="{% url 'departements:department_delete' department.pk %}" 
+                          method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr ?')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Department Info Card -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Informations Générales</h5>
+                        
+                        <div class="info-row mb-3">
+                            <strong>Code:</strong>
+                            <span class="badge badge-info float-right">{{ department.code }}</span>
+                        </div>
+
+                        {% if department.hod_name %}
+                        <div class="info-row mb-3">
+                            <strong>Responsable:</strong>
+                            <p class="mb-0">{{ department.hod_name }}</p>
+                        </div>
+
+                        <div class="info-row mb-3">
+                            <strong>Email HOD:</strong>
+                            <a href="mailto:{{ department.hod_email }}">{{ department.hod_email }}</a>
+                        </div>
+
+                        <div class="info-row mb-3">
+                            <strong>Téléphone:</strong>
+                            <a href="tel:{{ department.hod_phone }}">{{ department.hod_phone }}</a>
+                        </div>
+                        {% endif %}
+
+                        {% if department.building %}
+                        <div class="info-row mb-3">
+                            <strong>Localisation:</strong>
+                            <p class="mb-0">
+                                {{ department.building }}
+                                {% if department.floor %}
+                                    - Étage {{ department.floor }}
+                                {% endif %}
+                                {% if department.room_number %}
+                                    - Bureau {{ department.room_number }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        {% if department.founded_year %}
+                        <div class="info-row mb-3">
+                            <strong>Année de création:</strong>
+                            <span class="float-right">{{ department.founded_year }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if department.budget %}
+                        <div class="info-row mb-3">
+                            <strong>Budget:</strong>
+                            <span class="float-right text-success font-weight-bold">
+                                {{ department.budget|floatformat:2 }} DH
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <div class="info-row mb-3">
+                            <strong>Statut:</strong>
+                            {% if department.is_active %}
+                                <span class="badge badge-success float-right">Actif</span>
+                            {% else %}
+                                <span class="badge badge-danger float-right">Inactif</span>
+                            {% endif %}
+                        </div>
+
+                        {% if department.description %}
+                        <div class="info-row mt-4">
+                            <strong>Description:</strong>
+                            <p class="text-muted mt-2">{{ department.description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Statistiques</h5>
+                        
+                        <div class="stat-item mb-3">
+                            <h6 class="mb-2">
+                                <i class="fas fa-users text-primary"></i> Enseignants
+                            </h6>
+                            <h3 class="text-primary">{{ teachers_count }}</h3>
+                        </div>
+
+                        <div class="stat-item">
+                            <h6 class="mb-2">
+                                <i class="fas fa-book text-info"></i> Matières
+                            </h6>
+                            <h3 class="text-info">{{ department.get_subjects_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enseignants Section -->
+            <div class="col-md-8">
+                <!-- Current Assignments -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users"></i> Enseignants Actuels
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <a href="{% url 'departements:assign_teacher' department.pk %}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Assigner un Enseignant
+                            </a>
+                        </div>
+
+                        {% if current_assignments %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nom</th>
+                                            <th>Poste</th>
+                                            <th>Email</th>
+                                            <th>Date d'Assignation</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for assignment in current_assignments %}
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-secondary">{{ assignment.teacher_id }}</span>
+                                            </td>
+                                            <td>{{ assignment.teacher_name }}</td>
+                                            <td>
+                                                <span class="badge badge-light">
+                                                    {{ assignment.get_position_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="mailto:{{ assignment.teacher_email }}">
+                                                    {{ assignment.teacher_email|truncatechars:30 }}
+                                                </a>
+                                            </td>
+                                            <td>{{ assignment.assigned_date|date:"d/m/Y" }}</td>
+                                            <td class="text-right">
+                                                <form action="{% url 'departements:remove_assignment' department.pk assignment.pk %}" 
+                                                      method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                            onclick="return confirm('Retirer cet enseignant ?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Aucun enseignant n'est actuellement assigné à ce département.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Assignment History -->
+                {% if assignment_history %}
+                <div class="card mt-3">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-history"></i> Historique des Attributions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-light">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Poste</th>
+                                        <th>Date de Début</th>
+                                        <th>Date de Fin</th>
+                                        <th>Durée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assignment_history %}
+                                    <tr>
+                                        <td>{{ assignment.teacher_name }}</td>
+                                        <td>
+                                            <span class="badge badge-light">
+                                                {{ assignment.get_position_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ assignment.assigned_date|date:"d/m/Y" }}</td>
+                                        <td>{{ assignment.end_date|date:"d/m/Y" }}</td>
+                                        <td>-</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 PreSchool Management System.</p>
+    </footer>
+</div>
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+{% endblock %}

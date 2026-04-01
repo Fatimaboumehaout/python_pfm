@@ -1,0 +1,203 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block title %}Départements{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Départements</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de Bord</a></li>
+                        <li class="breadcrumb-item active">Départements</li>
+                    </ul>
+                </div>
+                <div class="col-auto text-right">
+                    <a href="{% url 'departements:add_department' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nouveau Département
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Départements</h5>
+                        <h2 class="card-number">{{ total_count }}</h2>
+                        <p class="card-text text-muted">Tous les départements</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <h5 class="card-title">Départements Actifs</h5>
+                        <h2 class="card-number text-success">{{ active_count }}</h2>
+                        <p class="card-text text-muted">En fonctionnement</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <h5 class="card-title">Inactifs</h5>
+                        <h2 class="card-number text-danger">{{ total_count|add:'-'|add:active_count }}</h2>
+                        <p class="card-text text-muted">Désactivés</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <form method="get" class="form-inline">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Rechercher par nom, code ou responsable..."
+                           value="{{ search_query }}" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary ml-2">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-control" onchange="window.location = '?status=' + this.value">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Tous les statuts</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Actifs</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactifs</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Departments Table -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0 datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Nom</th>
+                                        <th>Responsable</th>
+                                        <th>Localisation</th>
+                                        <th>Enseignants</th>
+                                        <th>Statut</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dept in departments %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-info">{{ dept.code }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'departements:department_detail' dept.pk %}">
+                                                <strong>{{ dept.name }}</strong>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if dept.hod_name %}
+                                                {{ dept.hod_name }}<br>
+                                                <small class="text-muted">{{ dept.hod_email }}</small>
+                                            {% else %}
+                                                <span class="text-muted">Non assigné</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if dept.building %}
+                                                {{ dept.building }}
+                                                {% if dept.floor %}(étage {{ dept.floor }}){% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-primary">{{ dept.teachers_count|default:0 }}</span>
+                                        </td>
+                                        <td>
+                                            {% if dept.is_active %}
+                                                <span class="badge badge-success">Actif</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Inactif</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="actions">
+                                                <a href="{% url 'departements:department_detail' dept.pk %}" 
+                                                   class="btn btn-sm bg-info-light" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'departements:department_update' dept.pk %}" 
+                                                   class="btn btn-sm bg-warning-light" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{% url 'departements:department_delete' dept.pk %}" 
+                                                      method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm bg-danger-light" 
+                                                            onclick="return confirm('Êtes-vous sûr ?')"
+                                                            title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox"></i> Aucun département trouvé
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Copyright © 2025 PreSchool Management System.</p>
+    </footer>
+</div>
+
+<script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'assets/js/popper.min.js' %}"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'assets/plugins/datatables/datatables.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('.datatable').DataTable({
+            "pageLength": 25,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.19/i18n/French.json"
+            }
+        });
+    });
+</script>
+{% endblock %}
