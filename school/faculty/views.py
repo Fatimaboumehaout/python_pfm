@@ -1,6 +1,7 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-# Create your views here.
+from django.shortcuts import render, redirect
+
 def index(request):
-   #return HttpResponse('First test')
-   return render(request,'index.html')
+    return render(request, 'authentication/login.html')
+
+def dashboard(request):
+    return render(request, 'students/student-dashboard.html')

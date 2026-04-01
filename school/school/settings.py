@@ -30,6 +30,16 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# Custom User Model
+AUTH_USER_MODEL = 'authentication.CustomUser'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Backend par défaut
+)
+
+LOGIN_URL = '/authentication/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -39,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'faculty',
     'student',
+    'authentication',
     
 ]
 
@@ -57,7 +68,7 @@ ROOT_URLCONF = 'school.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR, 'templates'],# we change here
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,4 +129,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)#we change also here
+STATICFILES_DIRS =(BASE_DIR, 'static')#we change also here
